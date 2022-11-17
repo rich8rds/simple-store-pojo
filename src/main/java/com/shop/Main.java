@@ -1,111 +1,113 @@
 package com.shop;
 
 import com.shop.enums.Qualification;
-import com.shop.exceptions.OutOfStockException;
-import com.shop.models.Customer;
-import com.shop.service.serviceImpl.CustomerServiceImpl;
-import com.shop.models.Store;
 import com.shop.models.*;
-import com.shop.service.serviceImpl.CashierServiceImpl;
+import com.shop.services.serviceImpl.CashierServiceImpl;
+import com.shop.services.serviceImpl.CustomerServiceImpl;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
+    private final static String RESPONSE  = "CLEARED";
+
     public static void main(String[] args) {
         Store store = new Store();
-        System.out.println(store.writeProductsToFile());
-        if(store.readProductsFromFile()) {
-            displayHeader();
-            System.out.println(store.getProducts());
-            multipleCustomerOrders(store);
 
-            System.out.println(store.getProducts());
-            String result = store.writeProductUpdatesToFile() ? "Updates saved to file" : "Error writing to file";
-            System.out.println("UPDATE: " + result);
-        }else System.out.println("Error reading from database.");
+        Address maxAddress = new Address("Oliver Saunders Street", "Idumota", "Lagos");
+        Applicant applicantJohn = new Applicant("AP093", "John", "Maxwell",
+                234814098123L, "johnMaxwell@gmail.com", maxAddress, Qualification.OND, 3);
+        System.err.println(applicantJohn.apply());
 
-        Address tomAddress = new Address("Rabbi Street", "Port Harcourt", "Rivers");
-        Applicant applicant = new Applicant("AP095", "Thompson", "Leke",
-                234814098123L, "kolade.lola@gmail.com", tomAddress, Qualification.HND, 5);
 
-        System.out.println(applicant.apply());
-    }
+        // REGISTERED CUSTOMERS
+        Address johnAddress = new Address("Polly Street", "Ikeja", "Lagos");
+        Customer john = new Customer("CUST893", "John", "Larson",
+                234814098123L, "larson@gmail.com", johnAddress, 100);
 
-    private static void displayHeader() {
-        System.out.println("*******************************************************************");
-        System.out.println("AVAILABLE PRODUCTS");
-        System.out.println("DATE:" + LocalDate.now());
-        System.out.println("*******************************************************************");
-        System.out.println("\tPRODUCT ID\t\tQUANTITY\t\t\tPRICE\t\tPRODUCT");
-        System.out.println("*******************************************************************");
-    }
+        Address innocentAddress = new Address("Makinde Street", "Ibadan", "Oyo");
+        Customer innocent = new Customer("CUST894", "Innocent", "Peters",
+                234818398179L, "innocent.peters@gmail.com", innocentAddress, 500_000);
 
-    public static void multipleCustomerOrders(Store store) {
-        CashierServiceImpl staffService = new CashierServiceImpl(store);
-        List<Product> productList = store.getProducts();
-        List<Customer> customers = store.getCustomers();
+        Address kolaAddress = new Address("Ohen Street", "Benin", "Edo");
+        Customer kola = new Customer("CUST895", "Kola", "Lolade",
+                234814098123L, "kolade.lola@gmail.com", kolaAddress, 1_000_000);
 
-        Customer customer = customers.get(1);
-        CustomerServiceImpl customerService = new CustomerServiceImpl(customer, store);
+        Address ireneAddress = new Address("Preacher Street", "Kansas", "Wisconsin");
+        Customer irene = new Customer("CUST898", "Irene", "Adler",
+                234844098474L, "ireneAdler@gmail.com", kolaAddress, 500_000);
 
-        try {
-            System.out.println(customerService.addProductToCart(productList.get(8), 2));
-            System.out.println(customerService.addProductToCart(productList.get(9), 4));
-            System.out.println(customerService.addProductToCart(productList.get(10), 3));
-//                System.err.println(customerService.addProductToCart(productList.get(0), 10)); //Throws OutOfStockException
-        } catch (OutOfStockException e) {
-            System.err.println("ERROR: " + e.getMessage());
-        }
+        Address justiceAddress = new Address("Kadane Street", "Orlando", "NewCousin");
+        Customer justice = new Customer("CUST899", "Justice", "League",
+                23492489123L, "justiceLeague@gmail.com", justiceAddress, 500_000);
 
-        if(customerService.buyProduct().equals("Cleared"))
-            staffService.sellProducts(customer);
-        else System.out.println("No purchases made");
+        if(store.readProductsFromFile()){
+            CustomerServiceImpl customerServiceForInnocent = new CustomerServiceImpl(innocent, store);
+            CustomerServiceImpl customerServiceForKola = new CustomerServiceImpl(kola, store);
+            CustomerServiceImpl customerServiceForJustice = new CustomerServiceImpl(justice, store);
+            CustomerServiceImpl customerServiceForIrene = new CustomerServiceImpl(irene, store);
 
-        Customer customer2 = customers.get(2);
-        CustomerServiceImpl customerService2 = new CustomerServiceImpl(customer2, store);
+            List<Product> productList = store.getProducts();
 
-        try {
-            System.out.println(customerService2.addProductToCart(productList.get(11), 1));
-            System.out.println(customerService2.addProductToCart(productList.get(12), 2));
-            System.out.println(customerService2.addProductToCart(productList.get(13), 2));
-//                System.err.println(customerService.addProductToCart(productList.get(0), 10)); //Throws OutOfStockException
-        } catch (OutOfStockException e) {
-            System.err.println("ERROR: " + e.getMessage());
-        }
+            //PRODUCTS IN STORE
+            Product toothbrush = productList.get(8);
+            Product soap = productList.get(9);
+            Product towel = productList.get(10);
 
-        if(customerService2.buyProduct().equals("Cleared"))
-            staffService.sellProducts(customer2);
-        else System.out.println("No purchases made");
+            Product facialTissue = productList.get(11);
+            Product wetWipes = productList.get(12);
+            Product coke = productList.get(13);
 
-        Customer customer3 = customers.get(3);
-        CustomerServiceImpl customerService3 = new CustomerServiceImpl(customer3, store);
+            Product sprite = productList.get(14);
+            Product beer = productList.get(15);
+            Product maltina = productList.get(16);
 
-        try {
-            System.out.println(customerService3.addProductToCart(productList.get(14), 6));
-            System.out.println(customerService3.addProductToCart(productList.get(15), 4));
-            System.out.println(customerService3.addProductToCart(productList.get(16), 3));
-//                System.err.println(customerService.addProductToCart(productList.get(0), 10)); //Throws OutOfStockException
-        } catch (OutOfStockException e) {
-            System.err.println("ERROR: " + e.getMessage());
-        }
+            Product cway = productList.get(17);
+            Product toothpaste = productList.get(18);
+            Product toiletRoll = productList.get(19);
 
-        if(customerService3.buyProduct().equals("Cleared"))
-            staffService.sellProducts(customer3);
-        else System.out.println("No purchases made");
 
-        Customer customer4 = customers.get(4);
-        CustomerServiceImpl customerService4 = new CustomerServiceImpl(customer4, store);
+            //INNOCENT'S ORDERS
+            customerServiceForInnocent.addProductToCart(toothbrush, 2);
+            customerServiceForInnocent.addProductToCart(soap, 4);
+            customerServiceForInnocent.addProductToCart(towel, 3);
 
-        System.out.println(customerService4.addProductToCart(productList.get(17), 8));
-        System.out.println(customerService4.addProductToCart(productList.get(18), 8));
-        System.out.println(customerService4.addProductToCart(productList.get(19), 3));
-        System.err.println(customerService.addProductToCart(productList.get(0), 10)); //Throws OutOfStockException
+            //KOLA'S ORDERS
+            customerServiceForKola.addProductToCart(facialTissue, 1);
+            customerServiceForKola.addProductToCart(wetWipes, 2);
+            customerServiceForKola.addProductToCart(coke, 2);
 
-        if(customerService4.buyProduct().equals("Cleared"))
-            staffService.sellProducts(customer4);
-        else System.out.println("No purchases made");
+            //JUSTICE'S ORDERS
+            System.err.println(customerServiceForJustice.addProductToCart(cway, 50));
+            customerServiceForJustice.addProductToCart(toothpaste, 8);
+            customerServiceForJustice.addProductToCart(toiletRoll, 3);
+            customerServiceForJustice.addProductToCart(sprite, 3);
 
-//        store.getCustomerPriorityQueue().forEach(x -> System.out.println(x.toString2()));
+            //IRENE'S ORDERS
+            System.err.println(customerServiceForIrene.addProductToCart(cway, 20));
+            customerServiceForIrene.addProductToCart(beer, 4);
+            customerServiceForIrene.addProductToCart(maltina, 3);
+
+            //ADD ALL CUSTOMERS TO A LIST
+            List<CustomerServiceImpl> customerServiceList = new ArrayList<>(List.of(
+                    customerServiceForIrene,
+                    customerServiceForInnocent,
+                    customerServiceForKola,
+                    customerServiceForJustice));
+
+            //EXECUTE ALL CUSTOMER ORDERS IN A THREAD
+            ExecutorService executorService = Executors.newFixedThreadPool(3);
+            customerServiceList.forEach(customerService -> executorService.submit(() -> {
+                CashierServiceImpl cashierService = new CashierServiceImpl(store);
+                if (customerService.buyProduct().equals("CLEARED"))
+                    cashierService.issueReceipt(customerService.getCustomer());
+            }));
+            executorService.shutdown();
+
+            System.out.println(executorService.isShutdown());
+
+        }else System.out.println("Error reading from file!");
     }
 }
